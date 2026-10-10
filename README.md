@@ -78,7 +78,7 @@ flowchart LR
         H --> B[(SQLite WAL<br/>asl xabar → fakt → hisob)]
         Q[signallar · xulosa · eslatma] --> N[xabarnoma navbati]
     end
-    M -. "gap → JSON sxema<br/>savol → asboblar" .-> AI[LLM API]
+    M -. "gap → JSON sxema<br/>savol → asboblar" .-> AI[Claude API]
     TG -. ovoz .-> STT[Google Speech-to-Text]
     N --> TG
     N --> W
@@ -101,7 +101,7 @@ pip install -r requirements.txt            # ovoz uchun tizimda ffmpeg ham kerak
 python3 -m pytest sinov                    # 182 sinov
 
 ./ishga_tushir.sh                          # panel: http://127.0.0.1:8090
-# birinchi kirishda boshliq hisobi yaratiladi; kalitlar (LLM, Google, Telegram bot) — Sozlamalar sahifasida
+# birinchi kirishda boshliq hisobi yaratiladi; kalitlar (Claude API, Google, Telegram bot) — Sozlamalar sahifasida
 ```
 
 Muhit o'zgaruvchilari — `.env.example`. Serverga joylash (Docker + Caddy):
@@ -112,7 +112,7 @@ MIYA_SERVER=root@SERVER_IP ornatish/joylash.sh miya.example.uz miyaapi.example.u
 
 ## Texnologiyalar
 
-Python 3.14 · FastAPI · Uvicorn · httpx · SQLite (WAL) · `cryptography` (Fernet) · openpyxl · Telegram Bot API va Mini App · LLM API (structured output + tool use) · Google Speech-to-Text · ffmpeg · kutubxonasiz JavaScript · Docker · Caddy · systemd taymerlari
+Python 3.14 · FastAPI · Uvicorn · httpx · SQLite (WAL) · `cryptography` (Fernet) · openpyxl · Telegram Bot API va Mini App · Claude API — sun'iy intellekt provayderi (structured output + tool use) · Google Speech-to-Text · ffmpeg · kutubxonasiz JavaScript · Docker · Caddy · systemd taymerlari
 
 ## Jonli
 
