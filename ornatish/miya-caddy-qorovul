@@ -1,0 +1,75 @@
+#!/bin/bash
+# MIYA — Caddy bloki va tarmoq ulanishining qorovuli (har 5 daqiqa, systemd taymeri).
+# Boshqa loyihalar qorovullari bilan bir xil qoidalar: bitta qulf; fayl faqat joyida yoziladi (Docker bog'lami inode'ga
+# bog'langan); tekshiruv alohida konteynerda, o'tmasa fayl joyida qaytariladi.
+# Domen DNS da SHU serverga qaramaguncha blok qo'shilmaydi — aks holda Caddy sertifikat ololmay urinishlarni cho'zadi.
+set -u
+Q=/opt/miya/ornatish/Caddyfile.miya.qolip
+E=/opt/miya/ornatish/.env
+# Umumiy Caddy: Caddyfile yo'li va konteyner nomi .env da (MIYA_CADDYFILE, MIYA_CADDY_KONTEYNER)
+F=$(sed -n 's/^MIYA_CADDYFILE=//p' "$E" 2>/dev/null | tr -d '[:space:]'); F=${F:-/opt/caddy/Caddyfile}
+CK=$(sed -n 's/^MIYA_CADDY_KONTEYNER=//p' "$E" 2>/dev/null | tr -d '[:space:]'); CK=${CK:-caddy}
+[ -f "$F" ] && [ -f "$Q" ] && [ -f "$E" ] || exit 0
+DOMEN=$(sed -n 's/^MIYA_DOMEN=//p' "$E" | tr -d '[:space:]')
+[ -n "$DOMEN" ] || exit 0
+docker inspect "$CK" >/dev/null 2>&1 || exit 0
+docker network inspect miya_ichki >/dev/null 2>&1 || exit 0      # MIYA o'chirilgan — tegmaymiz
+
+# 1) Tarmoq
+if ! docker inspect -f '{{json .NetworkSettings.Networks}}' "$CK" | grep -q '"miya_ichki"'; then
+  docker network connect miya_ichki "$CK" \
+    && logger -t miya-caddy "$CK miya_ichki tarmog'iga ulandi"
+fi
+
+
+API=$(sed -n 's/^MIYA_API_DOMEN=//p' "$E" | tr -d '[:space:]')
+QA=/opt/miya/ornatish/Caddyfile.miyaapi.qolip
+
+# 2) DNS shu serverga qarayaptimi (har domen alohida). Ochiq DNS'dan so'raladi: hosting provayderining DNS'i yozuv
+#    qo'shilishidan oldingi «topilmadi» javobini uzoq saqlaydi va blok soatlab kech qo'shilardi (08.10 da shunday bo'ldi).
+manzillar() {
+  local r
+  for r in 1.1.1.1 8.8.8.8; do
+    dig +short +time=3 +tries=1 A "$1" @"$r" 2>/dev/null | grep -E '^[0-9.]+$' && return 0
+  done
+  getent ahostsv4 "$1" | awk '{print $1}'
+}
+serverdami() {
+  local ip
+  for ip in $(manzillar "$1" | sort -u); do
+    hostname -I | tr ' ' '\n' | grep -qx "$ip" && return 0
+  done
+  return 1
+}
+QOSH=""
+serverdami "$DOMEN" && QOSH="asosiy"
+[ -n "$API" ] && [ -f "$QA" ] && serverdami "$API" && QOSH="$QOSH api"
+[ -n "$QOSH" ] || exit 0
+
+# 3) Bloklar (yo'qlari qo'shiladi)
+exec 9>/run/caddy-qorovul.lock || exit 0
+flock -w 60 9 || exit 0
+KERAK=""
+case " $QOSH " in *" asosiy "*) grep -qF "$DOMEN {" "$F" || KERAK="$KERAK asosiy";; esac
+case " $QOSH " in *" api "*) grep -qF "$API {" "$F" || KERAK="$KERAK api";; esac
+[ -n "$KERAK" ] || exit 0
+
+Z="/root/Caddyfile.miya-qorovul-$(date +%Y%m%d-%H%M%S)"
+cp "$F" "$Z"
+case " $KERAK " in *" asosiy "*) sed "s/{DOMEN}/$DOMEN/" "$Q" >> "$F";; esac
+case " $KERAK " in *" api "*) sed -e "s/{API_DOMEN}/$API/" -e "s/{DOMEN}/$DOMEN/" "$QA" >> "$F";; esac
+if docker run --rm -v "$F":/etc/caddy/Caddyfile:ro caddy:2-alpine \
+     caddy validate --config /etc/caddy/Caddyfile >/dev/null 2>&1; then
+  docker exec "$CK" caddy reload --config /etc/caddy/Caddyfile --force >/dev/null 2>&1 \
+    && logger -t miya-caddy "MIYA bloki qo'shildi ($KERAK: $DOMEN $API), Caddy qayta yuklandi" \
+    || logger -t miya-caddy "Blok qo'shildi, lekin reload yiqildi — docker restart $CK kerak"
+else
+  python3 - "$F" "$Z" <<'PY'
+import sys
+yol, zaxira = sys.argv[1], sys.argv[2]
+ma = open(zaxira, "rb").read()
+with open(yol, "r+b") as f:          # joyida: inode saqlanadi
+    f.write(ma); f.truncate()
+PY
+  logger -t miya-caddy "XATO: MIYA bloki qo'shilgach sozlama yaroqsiz bo'ldi — fayl qaytarildi"
+fi

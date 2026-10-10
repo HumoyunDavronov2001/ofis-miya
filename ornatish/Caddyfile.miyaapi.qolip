@@ -1,0 +1,23 @@
+
+# ===== MIYA API (ornatish/Caddyfile.miyaapi.qolip dan) — API va Telegram oynasi; qolgani asosiy domenga =====
+{API_DOMEN} {
+	encode zstd gzip
+	request_body {
+		max_size 25MB
+	}
+	@ilova path /api/* /ilova /ilova/* /v/* /shrift/*
+	handle @ilova {
+		reverse_proxy miya:8090 {
+			header_up X-Real-IP {remote_host}
+		}
+	}
+	handle {
+		redir https://{DOMEN}{uri} 302
+	}
+	log {
+		output file /var/log/caddy/miyaapi.log {
+			roll_size 20MiB
+			roll_keep 5
+		}
+	}
+}

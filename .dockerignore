@@ -1,0 +1,8 @@
+malumot
+sinov
+**/__pycache__
+**/*.pyc
+dizayn/*.png
+dizayn/*.html
+ornatish/.env
+.git

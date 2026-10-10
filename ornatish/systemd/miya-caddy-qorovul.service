@@ -1,0 +1,6 @@
+[Unit]
+Description=MIYA — Caddy bloki va tarmog'ini tekshirish/tiklash
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/miya-caddy-qorovul

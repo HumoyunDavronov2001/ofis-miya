@@ -1,0 +1,32 @@
+# MIYA — serverdagi o'rnatish: umumiy Caddy konteyneri ortida, o'z yopiq tarmog'ida (miya_ichki).
+# Port tashqariga chiqarilmaydi — faqat Caddy ulanadi. Ishga tushirish: ornatish/serverda.sh (joylash.sh chaqiradi).
+name: miya
+services:
+  miya:
+    build:
+      context: ..
+    image: miya:joriy
+    container_name: miya
+    restart: unless-stopped
+    environment:
+      MIYA_PROXY: "1"
+    volumes:
+      - malumot:/data
+    networks:
+      - ichki
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m              # ovozni bo'laklash (ffmpeg) vaqtincha shu yerda
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+volumes:
+  malumot:
+    name: miya_malumot
+
+networks:
+  ichki:
+    name: miya_ichki

@@ -1,0 +1,19 @@
+
+# ===== MIYA — ofis xotirasi (ornatish/Caddyfile.miya.qolip dan) =====
+{DOMEN} {
+	encode zstd gzip
+	# xodim hujjati va ish dalili rasmlari
+	request_body {
+		max_size 25MB
+	}
+	reverse_proxy miya:8090 {
+		# mijoz yuborgan X-Real-IP ni Caddy tozalamaydi — haqiqiy IP bilan almashtiriladi
+		header_up X-Real-IP {remote_host}
+	}
+	log {
+		output file /var/log/caddy/miya.log {
+			roll_size 20MiB
+			roll_keep 5
+		}
+	}
+}

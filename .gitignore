@@ -1,0 +1,10 @@
+malumot/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+ornatish/.env
+*.db
+*.db-wal
+*.db-shm
+.kalit

@@ -1,0 +1,6 @@
+[Unit]
+Description=MIYA — kunlik zaxira
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/miya-zaxira

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Miya — mening hisobim</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="/shrift/shrift.css">
+<link rel="stylesheet" href="/shrift/tabler-icons.min.css">
+<style>
+:root{--fon:#EDF0F5;--yuza:#FFF;--chiziq:#E3E7EE;--chiziq2:#D3D9E3;--matn:#0D1424;--matn2:#515B70;--urgu:#2F5BEA;--urgu-och:#EBF0FF;--urgu-t:#1E40AF;
+  --kirim:#0B7A53;--chiqim:#C0362C;--kut:#A35C00;--kut-och:#FFF5E0;--kut-ch:#E2A23B;--tun:#0E1630;--ease:cubic-bezier(.2,.8,.2,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Manrope,system-ui,sans-serif;background:var(--fon);color:var(--matn);-webkit-font-smoothing:antialiased;padding:12px 12px 90px}
+.raqam{font-variant-numeric:tabular-nums}
+.ib{display:flex;align-items:center;gap:10px;padding:2px 4px 10px}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:#E4EBFF;color:#1E3A9A}
+.ib b{display:block;font-size:15px;font-weight:800;line-height:1.2}.ib small{font-size:12.5px;color:var(--matn2);font-weight:600}
+.qahr{position:relative;background:var(--tun);color:#EAF0FF;border-radius:22px;padding:15px 15px 13px;overflow:hidden;isolation:isolate;animation:kir .5s var(--ease) backwards}
+.qahr::before{content:"";position:absolute;width:380px;height:380px;left:-150px;top:-220px;background:radial-gradient(closest-side,rgba(83,110,255,.55),rgba(83,110,255,0));z-index:-1}
+.qahr::after{content:"";position:absolute;width:300px;height:300px;right:-130px;bottom:-200px;background:radial-gradient(closest-side,rgba(24,180,201,.35),rgba(24,180,201,0));z-index:-1}
+.qahr small{font-size:12.5px;font-weight:700;color:#A9B8E0}
+.qahr .s{font-size:32px;font-weight:800;letter-spacing:-.04em;line-height:1.1;margin:2px 0 10px;color:#fff}
+.ikki{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ikki div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:7px 10px}
+.ikki em{display:block;font-style:normal;font-size:12px;font-weight:700;color:#A9B8E0}.ikki b{font-size:15px;font-weight:800;color:#fff}
+.kutq{border:1.5px dashed var(--kut-ch);background:var(--kut-och);border-radius:16px;padding:10px 12px;margin-top:10px;animation:kir .5s var(--ease) .1s backwards}
+.kutq p{font-size:13.5px;font-weight:600;color:#5C3600;line-height:1.4}
+.kutq .t{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.kutq button{font:inherit;font-size:13.5px;font-weight:800;padding:9px;border-radius:11px;background:#fff;border:1px solid var(--kut-ch);color:var(--kut)}
+.kutq button.ha{background:var(--urgu);border-color:var(--urgu);color:#fff}
+.karta{background:var(--yuza);border-radius:18px;padding:10px 12px 4px;border:1px solid var(--chiziq);margin-top:10px;animation:kir .5s var(--ease) .2s backwards}
+.karta h3{font-size:14.5px;font-weight:800;margin:2px 0;display:flex;justify-content:space-between}
+.hq{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px dashed var(--chiziq2);font-size:13.5px;font-weight:600}
+.hq:first-of-type{border-top:0}.hq b{font-weight:800;white-space:nowrap}.hq .p{color:var(--kirim)}.hq .m{color:var(--chiqim)}
+.hq.jami{border-top:2px solid var(--matn);font-weight:800}
+.ish{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--chiziq);font-size:13.5px;font-weight:700}
+.ish:first-of-type{border-top:0}.ish small{display:block;font-size:12px;font-weight:700;color:var(--matn2)}.ish small.q{color:var(--chiqim)}
+.ish label{width:40px;height:40px;border-radius:12px;background:var(--urgu-och);color:var(--urgu-t);display:grid;place-items:center;font-size:20px}
+.ish input{display:none}
+.past{position:fixed;left:0;right:0;bottom:0;padding:10px 12px calc(12px + env(safe-area-inset-bottom));background:var(--fon);border-top:1px solid var(--chiziq)}
+.past button{width:100%;font:inherit;font-weight:800;font-size:15px;background:var(--urgu);color:#fff;border:0;border-radius:16px;padding:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.bosh{text-align:center;color:var(--matn2);font-weight:600;padding:40px 10px}
+@keyframes kir{from{opacity:0;transform:translateY(10px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="ildiz"><div class="bosh">Yuklanmoqda…</div></div>
+<div class="past"><button id="yop"><i class="ti ti-message-circle"></i>Chatga qaytish</button></div>
+<script>
+"use strict";
+const tg = window.Telegram && Telegram.WebApp;
+const H = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const OY = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"];
+const sana = s => { if (!s) return ""; const d = new Date(s + "T00:00:00"); return `${d.getDate()}-${OY[d.getMonth()]}`; };
+document.getElementById("yop").onclick = () => tg ? tg.close() : history.back();
+
+async function api(url, body) {
+  const o = {headers: {"X-Tg-Init": tg ? tg.initData : ""}};
+  if (body) { o.method = "POST"; o.headers["Content-Type"] = "application/json"; o.headers["X-Miya"] = "1"; o.body = JSON.stringify(body); }
+  const r = await fetch(url, o);
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.xato || d.detail || "Xato");
+  return d;
+}
+
+async function chiz() {
+  const el = document.getElementById("ildiz");
+  if (!tg || !tg.initData) { el.innerHTML = `<div class="bosh">Bu oyna Telegram ichida, bot orqali ochiladi.</div>`; return; }
+  tg.ready(); tg.expand();
+  let v, ishlar;
+  try { [v, ishlar] = await Promise.all([api("/api/ilova/hisobim"), api("/api/ilova/ishlar")]); }
+  catch (e) { el.innerHTML = `<div class="bosh">${H(e.message)}</div>`; return; }
+  const ishHtml = ishlar.ishlar.map(i => `<div class="ish"><div>${H(i.nom)}${i.joy ? ` · ${H(i.joy)}` : ""}
+      <small class="${i.kechikdi ? "q" : ""}">${i.kechikdi ? `${i.kechikdi} kun kechikdi` : i.muddat ? sana(i.muddat) + (i.soat ? " " + H(i.soat) : "") : "muddatsiz"}${i.holat === "bajarildi_dalil" ? " · rasm kutilmoqda" : ""}${i.narx ? " · " + H(i.narx.t) : ""}</small></div>
+      ${i.dalil_turi === "rasm" || i.dalil_turi === "mijoz" ? `<label title="Rasm bilan yopish"><i class="ti ti-camera"></i><input type="file" accept="image/*" capture="environment" data-ish="${i.id}"></label>` : ""}</div>`).join("");
+  const ism = v.odam.ism;
+  const kut = v.kutmoqda_men.map(h => {
+    const tomon = h.oluvchi_id === v.odam.id && h.oluvchi_holat === "kutilmoqda" ? "oluvchi" : "beruvchi";
+    return `<div class="kutq"><p><b>${H(h.summa.t)}</b> · ${H(h.nom)} — ${H(h.yozgan)} yozdi (${sana(h.voqea_sana)}).
+      ${tomon === "oluvchi" ? "Oldingizmi?" : "Berdingizmi?"}</p><div class="t">
+      <button class="ha" data-h="${h.id}" data-t="${tomon}" data-ha="1">${tomon === "oluvchi" ? "Ha, oldim" : "Ha, berdim"}</button>
+      <button data-h="${h.id}" data-t="${tomon}" data-ha="0">Yo'q</button></div></div>`;
+  }).join("");
+  const qator = v.qatorlar.map(q => `<div class="hq"><span>${H(q.nom)}${q.sana ? ` · ${sana(q.sana)}` : ""}</span><b class="${q.summa.m > 0 ? "p" : "m"}">${q.summa.m > 0 ? "+ " : ""}${H(q.summa.t)}</b></div>`).join("");
+  el.innerHTML = `<div class="ib"><span class="av">${H(ism.split(" ").map(x => x[0]).join("").slice(0, 2))}</span><div><b>${H(ism)}</b><small>${H(v.oy_matn)} hisobi</small></div></div>
+    <div class="qahr"><small>Olishim kerak</small><div class="s raqam">${H(v.qolgani.t)}</div>
+    <div class="ikki"><div><em>Hisoblandi</em><b class="raqam">${H(v.hisoblandi.t)}</b></div><div><em>Oldim</em><b class="raqam">${H(v.olindi.t)}</b></div></div></div>
+    ${kut}
+    ${v.kutilmoqda_jami.m && !kut ? `<div class="kutq"><p><b>${H(v.kutilmoqda_jami.t)}</b> tasdiq kutmoqda — hisobga hali kirmagan.</p></div>` : ""}
+    <div class="karta"><h3>Qanday hisoblandi</h3>
+      ${v.otgan.m ? `<div class="hq"><span>O'tgan oydan</span><b>${H(v.otgan.t)}</b></div>` : ""}
+      ${qator || `<div class="hq"><span>Bu oy yozuv yo'q</span><b>—</b></div>`}
+      <div class="hq jami"><span>Olishim kerak</span><b>${H(v.qolgani.t)}</b></div></div>
+    ${ishlar.ishlar.length ? `<div class="karta"><h3>Ishlarim <small>${ishlar.ishlar.length} ta</small></h3>${ishHtml}</div>` : ""}
+    ${(v.ish_kutilmoqda || []).length ? `<div class="kutq"><p>Ish uchun qabul kutmoqda: <b>${H(v.ish_kutilmoqda_jami.t)}</b> — boshliq qabul qilgach hisobga tushadi.</p></div>` : ""}
+    ${v.qolida.m ? `<div class="karta"><h3>Qo'limdagi ishxona puli</h3><div class="hq"><span>Kassaga topshirilmagan</span><b>${H(v.qolida.t)}</b></div></div>` : ""}`;
+  el.onchange = async e => {
+    const inp = e.target.closest("input[type=file][data-ish]");
+    if (!inp || !inp.files.length) return;
+    const fd = new FormData();
+    fd.append("ish_id", inp.dataset.ish);
+    fd.append("fayl", inp.files[0]);
+    try {
+      const r = await fetch("/api/ilova/dalil", {method: "POST", headers: {"X-Tg-Init": tg.initData, "X-Miya": "1"}, body: fd});
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.xato || d.detail || "Yuklanmadi");
+      if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+      chiz();
+    } catch (x) { alert(x.message); }
+  };
+  el.onclick = async e => {
+    const b = e.target.closest("[data-h]");
+    if (!b) return;
+    b.disabled = true;
+    try { await api("/api/ilova/tomon", {harakat_id: +b.dataset.h, tomon: b.dataset.t, ha: b.dataset.ha === "1"}); if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("success"); chiz(); }
+    catch (x) { alert(x.message); b.disabled = false; }
+  };
+}
+chiz();
+</script>
+</body>
+</html>

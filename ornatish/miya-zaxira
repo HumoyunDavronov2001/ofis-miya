@@ -1,0 +1,19 @@
+#!/bin/bash
+# MIYA — kunlik zaxira serverning o'z diskiga (/var/backups/miya), 14 kun:
+#  - baza: dastur o'zi 03:30 da olgan tekshirilgan nusxa + .kalit (shifrlangan kalitlarni ochish uchun SHART);
+#  - fayllar (ovoz, chek, ish dalili) va xodim hujjatlari: ko'zgu nusxa, o'chirilmaydi (dasturda fayl o'chirilmaydi).
+set -u
+D=/var/backups/miya
+mkdir -p "$D/baza" "$D/fayllar" && chmod 700 "$D"
+V=$(docker volume inspect miya_malumot -f '{{.Mountpoint}}' 2>/dev/null) || { logger -t miya-zaxira "XATO: hajm topilmadi"; exit 1; }
+OXIRGI=$(ls -1t "$V"/zaxira/miya-*.db 2>/dev/null | head -1)
+if [ -z "$OXIRGI" ]; then
+  logger -t miya-zaxira "XATO: dastur zaxirasi hali yo'q (03:30 dan keyin paydo bo'ladi)"
+  exit 1
+fi
+cp -p "$OXIRGI" "$D/baza/" && cp -p "$V/.kalit" "$D/baza/.kalit" 2>/dev/null; chmod 600 "$D/baza/"*
+find "$D/baza" -name 'miya-*.db' -mtime +14 -delete
+for q in fayllar hujjatlar; do
+  [ -d "$V/$q" ] && rsync -a "$V/$q/" "$D/fayllar/$q/"
+done
+logger -t miya-zaxira "zaxira tayyor: $(basename "$OXIRGI") + fayllar"
